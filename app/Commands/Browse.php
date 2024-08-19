@@ -21,7 +21,7 @@ class Browse extends Command
      *
      * @var string
      */
-    protected $description = 'Browse Kobo books and print highlights';
+    protected $description = 'Browse Kobo books and highlights';
 
     /**
      * Execute the console command.

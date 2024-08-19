@@ -4,11 +4,12 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use lywzx\epub\EpubParser;
 use MichaelAChrisco\ReadOnly\ReadOnlyTrait;
 
 /**
  * @property-read string $ContentID
- * @property-read string $ContentType
+ * @property-read string $ContentType `9` or `899` only?
  * @property-read string $MimeType
  * @property-read string $BookID
  * @property-read string $BookTitle
@@ -107,4 +108,32 @@ class Content extends Model
     use ReadOnlyTrait;
 
     protected $table = 'content';
+
+    private $epubData;
+
+    public function getEpubPath(): string
+    {
+        return config('app.ePubDir') . '/' . $this->BookID;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function getEpubData(): EpubParser
+    {
+        if ($this->epubData !== null) {
+            return $this->epubData;
+        }
+
+        $parser = new EpubParser($this->getEpubPath());
+        $parser->parse();
+
+        return $this->epubData = $parser;
+    }
+
+    public function clippings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Bookmark::class, 'VolumeID', 'BookID')
+            ->orderBy('DateCreated');
+    }
 }

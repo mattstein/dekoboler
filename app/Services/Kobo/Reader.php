@@ -21,16 +21,4 @@ class Reader
             ->orderBy('DateCreated')
             ->get();
     }
-
-    /**
-     * @throws \Exception
-     */
-    public function getParsedEpubForBook($book): bool|array|string
-    {
-        $ebookPath = config('app.ePubDir') . '/' . $book->BookID;
-        $parser = new EpubParser($ebookPath);
-        $parser->parse();
-
-        return $parser->getDcItem();
-    }
 }

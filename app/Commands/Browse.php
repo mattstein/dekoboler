@@ -5,6 +5,7 @@ namespace App\Commands;
 use App\Services\Kobo\Reader;
 use LaravelZero\Framework\Commands\Command;
 use Carbon\Carbon;
+use lywzx\epub\EpubParser;
 
 class Browse extends Command
 {
@@ -40,7 +41,9 @@ class Browse extends Command
         $selectedBook = $books->where('BookTitle', $selectedBookTitle)->first();
 
         try {
-            $parsedEpubData = $reader->getParsedEpubForBook($selectedBook);
+            /* @var EpubParser $parsedEpubData */
+            $parsedEpubData = $selectedBook->getEpubData();
+            $epubMeta = $parsedEpubData->getDcItem();
         } catch (\Throwable $exception) {
 
         }
@@ -50,30 +53,36 @@ class Browse extends Command
         $this->line('---');
         $this->line('title: ' . $selectedBook->BookTitle);
 
-        if (isset($parsedEpubData)) {
-            if (isset($parsedEpubData['creator'])) {
-                $this->line('author: ' . $parsedEpubData['creator']);
+        if (isset($epubMeta)) {
+            if (isset($epubMeta['creator'])) {
+                $this->line('author: ' . $epubMeta['creator']);
             }
 
-            if (isset($parsedEpubData['date'])) {
-                $this->line('publicationDate: ' . $parsedEpubData['date']);
+            if (isset($epubMeta['date'])) {
+                $this->line('publicationDate: ' . $epubMeta['date']);
             }
 
-            if (isset($parsedEpubData['source'])) {
-                $this->line('isbn: ' . $parsedEpubData['source']);
+            if (isset($epubMeta['source'])) {
+                $this->line('isbn: ' . $epubMeta['source']);
             }
         }
 
         $this->line('---');
 
-        $highlights = $reader->getClippingsForBook($selectedBook);
-
-        $highlights->each(function ($highlight) {
+        $selectedBook->clippings()->each(function ($highlight) {
             // TODO: find location or page number
             $this->newLine();
             $this->line('> ' . trim($highlight->Text));
             $this->newLine();
-            $this->line('– ' . Carbon::parse($highlight->DateCreated)->format('n/j/y \a\t g:ia'));
+
+            $formattedDate = Carbon::parse($highlight->DateCreated)->format('n/j/y \a\t g:ia');
+
+            //if ($chapterTitle = $highlight->getChapterTitle()) {
+                //$this->line('– ' . $formattedDate . ', *' . $chapterTitle . '*');
+            //} else {
+                $this->line('– ' . $formattedDate);
+            //}
+
             $this->newLine();
         });
     }

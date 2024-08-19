@@ -39,6 +39,7 @@ class Bookmark extends Model
 
     protected $table = 'Bookmark';
 
+
     public function content(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -47,6 +48,17 @@ class Bookmark extends Model
             'BookID'
         );
     }
+
+    public function getChapterTitle(): ?string
+    {
+        if (! $chapter = Content::where('ContentID', $this->ContentID)->first()) {
+            return null;
+        }
+
+        return $chapter->Title;
+    }
+
+
 
 }
 

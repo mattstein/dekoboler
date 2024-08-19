@@ -3,9 +3,9 @@
 namespace App\Commands;
 
 use App\Services\Kobo\Reader;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
-use Carbon\Carbon;
-use lywzx\epub\EpubParser;
 
 class Browse extends Command
 {
@@ -38,52 +38,29 @@ class Browse extends Command
             $books->map(function ($book) { return $book->BookTitle; })->all(),
         );
 
-        $selectedBook = $books->where('BookTitle', $selectedBookTitle)->first();
+        $selectedBook = $books
+            ->where('BookTitle', $selectedBookTitle)
+            ->first();
 
-        try {
-            /* @var EpubParser $parsedEpubData */
-            $parsedEpubData = $selectedBook->getEpubData();
-            $epubMeta = $parsedEpubData->getDcItem();
-        } catch (\Throwable $exception) {
+        $selectedAction = $this->choice(
+            'What do you want to do with clippings?',
+            [
+                'view',
+                'save'
+            ],
+        );
 
-        }
+        if ($selectedAction === 'view') {
+            echo $selectedBook->getClippingsAsMarkdown();
+        } else {
+            $filename = Str::slug($selectedBookTitle) . '.md';
+            $content = $selectedBook->getClippingsAsMarkdown();
 
-        // TODO: find read time
-        // TODO: find finished time
-        $this->line('---');
-        $this->line('title: ' . $selectedBook->BookTitle);
-
-        if (isset($epubMeta)) {
-            if (isset($epubMeta['creator'])) {
-                $this->line('author: ' . $epubMeta['creator']);
-            }
-
-            if (isset($epubMeta['date'])) {
-                $this->line('publicationDate: ' . $epubMeta['date']);
-            }
-
-            if (isset($epubMeta['source'])) {
-                $this->line('isbn: ' . $epubMeta['source']);
+            if (Storage::disk('local')->put($filename, $content)) {
+                $this->line('Saved ' . Storage::disk('local')->path($filename) . '.');
+            } else {
+                $this->error('Couldn’t save the file.');
             }
         }
-
-        $this->line('---');
-
-        $selectedBook->clippings()->each(function ($highlight) {
-            // TODO: find location or page number
-            $this->newLine();
-            $this->line('> ' . trim($highlight->Text));
-            $this->newLine();
-
-            $formattedDate = Carbon::parse($highlight->DateCreated)->format('n/j/y \a\t g:ia');
-
-            //if ($chapterTitle = $highlight->getChapterTitle()) {
-                //$this->line('– ' . $formattedDate . ', *' . $chapterTitle . '*');
-            //} else {
-                $this->line('– ' . $formattedDate);
-            //}
-
-            $this->newLine();
-        });
     }
 }

@@ -58,7 +58,5 @@ class Bookmark extends Model
         return $chapter->Title;
     }
 
-
-
 }
 

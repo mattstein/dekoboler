@@ -10,4 +10,3 @@ A CLI tool to extract highlights from your Kobo.
 - [ ] improve reliability of ePub metadata reading
 - [ ] fetch StoryGraph and Literal book URLs
 - [ ] fix timezone
-- 

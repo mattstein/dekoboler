@@ -3,8 +3,9 @@
 namespace App;
 
 use Carbon\Carbon;
+use ePub\Definition\Package;
+use ePub\Reader;
 use Illuminate\Database\Eloquent\Model;
-use lywzx\epub\EpubParser;
 use MichaelAChrisco\ReadOnly\ReadOnlyTrait;
 
 /**
@@ -109,7 +110,7 @@ class Content extends Model
 
     protected $table = 'content';
 
-    private $epubData;
+    private Package $epubData;
 
     public function getEpubPath(): string
     {
@@ -119,16 +120,17 @@ class Content extends Model
     /**
      * @throws \Exception
      */
-    public function getEpubData(): EpubParser
+    public function getEpubData(): Package
     {
         if ($this->epubData !== null) {
             return $this->epubData;
         }
 
-        $parser = new EpubParser($this->getEpubPath());
-        $parser->parse();
+        $reader = new Reader;
 
-        return $this->epubData = $parser;
+        $parsed = $reader->load($this->getEpubPath());
+
+        return $this->epubData = $parsed;
     }
 
     public function clippings(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -142,8 +144,7 @@ class Content extends Model
         $lines = collect([]);
 
         try {
-            $parsedEpubData = $this->getEpubData();
-            $epubMeta = $parsedEpubData->getDcItem();
+            $epubData = $this->getEpubData();
         } catch (\Throwable $exception) {
 
         }
@@ -153,17 +154,23 @@ class Content extends Model
         $lines->push('---');
         $lines->push('title: '.$this->BookTitle);
 
-        if (isset($epubMeta)) {
-            if (isset($epubMeta['creator'])) {
-                $lines->push('author: '.$epubMeta['creator']);
+        if (isset($epubData)) {
+            $metaData = $epubData->getMetadata();
+
+            if ($metaData->has('creator')) {
+                $lines->push('author: '.$metaData->getValue('creator'));
             }
 
-            if (isset($epubMeta['date'])) {
-                $lines->push('publicationDate: '.$epubMeta['date']);
+            if ($metaData->has('date')) {
+                $lines->push('publicationDate: '.$metaData->getValue('date'));
             }
 
-            if (isset($epubMeta['source'])) {
-                $lines->push('isbn: '.$epubMeta['source']);
+            if ($metaData->has('publisher')) {
+                $lines->push('publisher: '.$metaData->getValue('publisher'));
+            }
+
+            if ($metaData->has('source')) {
+                $lines->push('isbn: '.$metaData->getValue('source'));
             }
         }
 

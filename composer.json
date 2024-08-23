@@ -19,8 +19,8 @@
         "php": "^8.2.0",
         "ext-sqlite3": "*",
         "illuminate/database": "^11.5",
+        "justinrainbow/epub": "^0.0.3",
         "laravel-zero/framework": "^11.0.0",
-        "lywzx/php-epub": "^0.1.2",
         "michaelachrisco/readonly": "^1.0"
     },
     "require-dev": {

@@ -3,7 +3,6 @@
 namespace App;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use lywzx\epub\EpubParser;
 use MichaelAChrisco\ReadOnly\ReadOnlyTrait;
@@ -114,7 +113,7 @@ class Content extends Model
 
     public function getEpubPath(): string
     {
-        return config('app.ePubDir') . '/' . $this->BookID;
+        return config('app.ePubDir').'/'.$this->BookID;
     }
 
     /**
@@ -152,19 +151,19 @@ class Content extends Model
         // TODO: find read time
         // TODO: find finished time
         $lines->push('---');
-        $lines->push('title: ' . $this->BookTitle);
+        $lines->push('title: '.$this->BookTitle);
 
         if (isset($epubMeta)) {
             if (isset($epubMeta['creator'])) {
-                $lines->push('author: ' . $epubMeta['creator']);
+                $lines->push('author: '.$epubMeta['creator']);
             }
 
             if (isset($epubMeta['date'])) {
-                $lines->push('publicationDate: ' . $epubMeta['date']);
+                $lines->push('publicationDate: '.$epubMeta['date']);
             }
 
             if (isset($epubMeta['source'])) {
-                $lines->push('isbn: ' . $epubMeta['source']);
+                $lines->push('isbn: '.$epubMeta['source']);
             }
         }
 
@@ -172,9 +171,9 @@ class Content extends Model
 
         $this->clippings()->each(function ($highlight) use (&$lines) {
             // TODO: find location or page number
-            $lines->push("");
-            $lines->push('> ' . trim($highlight->Text));
-            $lines->push("");
+            $lines->push('');
+            $lines->push('> '.trim($highlight->Text));
+            $lines->push('');
 
             $formattedDate = Carbon::parse($highlight->DateCreated)
                 ->format('n/j/y \a\t g:ia');
@@ -182,10 +181,10 @@ class Content extends Model
             //if ($chapterTitle = $highlight->getChapterTitle()) {
             //$lines->push('– ' . $formattedDate . ', *' . $chapterTitle . '*');
             //} else {
-            $lines->push('– ' . $formattedDate);
+            $lines->push('– '.$formattedDate);
             //}
 
-            $lines->push("");
+            $lines->push('');
         });
 
         if ($rawLines) {

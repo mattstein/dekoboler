@@ -5,7 +5,6 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use MichaelAChrisco\ReadOnly\ReadOnlyTrait;
-use App\Content;
 
 /**
  * @property-read string $BookmarkID
@@ -39,7 +38,6 @@ class Bookmark extends Model
 
     protected $table = 'Bookmark';
 
-
     public function content(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -57,6 +55,4 @@ class Bookmark extends Model
 
         return $chapter->Title;
     }
-
 }
-

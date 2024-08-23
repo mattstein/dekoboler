@@ -2,7 +2,6 @@
 
 namespace App\Commands;
 
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Storage;
 use LaravelZero\Framework\Commands\Command;
 
@@ -31,16 +30,17 @@ class CopyDatabase extends Command
         $filename = basename($sourcePath);
 
         if (! file_exists($sourcePath)) {
-            $this->error($sourcePath . ' does not exist.');
+            $this->error($sourcePath.' does not exist.');
+
             return;
         }
 
         $targetPath = Storage::disk('local')->path($filename);
 
         if (copy($sourcePath, $targetPath)) {
-            $this->line('Copied to ' . $targetPath . '.');
+            $this->line('Copied to '.$targetPath.'.');
         } else {
-            $this->error('Failed to copy ' . $sourcePath . ' to ' . $targetPath);
+            $this->error('Failed to copy '.$sourcePath.' to '.$targetPath);
         }
     }
 }

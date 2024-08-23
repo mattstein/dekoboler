@@ -4,7 +4,6 @@ namespace App\Services\Kobo;
 
 use App\Bookmark;
 use App\Content;
-use lywzx\epub\EpubParser;
 
 class Reader
 {

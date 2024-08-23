@@ -30,12 +30,14 @@ class Browse extends Command
      */
     public function handle(): void
     {
-        $reader = new Reader();
+        $reader = new Reader;
 
         $books = $reader->getBooks();
         $selectedBookTitle = $this->choice(
             'Which book?',
-            $books->map(function ($book) { return $book->BookTitle; })->all(),
+            $books->map(function ($book) {
+                return $book->BookTitle;
+            })->all(),
         );
 
         $selectedBook = $books
@@ -46,18 +48,18 @@ class Browse extends Command
             'What do you want to do with clippings?',
             [
                 'view',
-                'save'
+                'save',
             ],
         );
 
         if ($selectedAction === 'view') {
             echo $selectedBook->getClippingsAsMarkdown();
         } else {
-            $filename = Str::slug($selectedBookTitle) . '.md';
+            $filename = Str::slug($selectedBookTitle).'.md';
             $content = $selectedBook->getClippingsAsMarkdown();
 
             if (Storage::disk('local')->put($filename, $content)) {
-                $this->line('Saved ' . Storage::disk('local')->path($filename) . '.');
+                $this->line('Saved '.Storage::disk('local')->path($filename).'.');
             } else {
                 $this->error('Couldn’t save the file.');
             }

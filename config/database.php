@@ -8,5 +8,5 @@ return [
             //'database' => 'storage/app/KoboReader.sqlite',
             'prefix' => '',
         ],
-    ]
+    ],
 ];

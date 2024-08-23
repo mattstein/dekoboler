@@ -66,6 +66,23 @@ title: How to Do Nothing
 – 8/17/24 at 4:50am
 ```
 
+## Why You Shouldn’t Care
+
+- No tests.
+- Assumes you’ve connected your Kobo to your Mac and allowed it to connect/mount.
+- Prints or saves Markdown in a sparing format that’s hopelessly inflexible at the moment.
+- See TODO.
+
+## Life Hack
+
+Run `php dekoboler copy-database` to make a copy of your Kobo’s SQLite database in the project’s `storage/app` directory.
+
+You can then update `config/database.php` and point to the copy, and put your Kobo back where it normally lives:
+
+```php
+'database' => 'storage/app/KoboReader.sqlite',
+```
+
 ## TODO
 
 - [ ] make database read only!

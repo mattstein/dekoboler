@@ -31,7 +31,7 @@ use MichaelAChrisco\ReadOnly\ReadOnlyTrait;
  * @property-read int $VolumeIndex
  * @property-read int $ReadStatus
  * @property-read string $PublicationId
- * @property-read $FavouritesIndex
+ * @property-read int $FavouritesIndex “empty” type in database and always seems to be `-1` (?)
  * @property-read int $Accessibility
  * @property-read string $ContentURL
  * @property-read string $Language
@@ -73,7 +73,7 @@ use MichaelAChrisco\ReadOnly\ReadOnlyTrait;
  * @property-read string $EntitlementId
  * @property-read string $CrossRevisionId
  * @property-read string $DownloadUrl
- * @property-read $ReadStateSynced
+ * @property-read bool $ReadStateSynced
  * @property-read int $TimesStartedReading
  * @property-read int $TimesSpentReading
  * @property-read string $LastTimeStartedReading
@@ -82,9 +82,9 @@ use MichaelAChrisco\ReadOnly\ReadOnlyTrait;
  * @property-read string $ExternalIds
  * @property-read string $PurchaseRevisionId
  * @property-read string $SeriesID
- * @property-read $SeriesNumberFloat
+ * @property-read float $SeriesNumberFloat
  * @property-read string $AdobeLoanExpiration
- * @property-read $HideFromHomePage
+ * @property-read bool $HideFromHomePage
  * @property-read bool $IsInternetArchive
  * @property-read string $titleKana
  * @property-read string $subtitleKana
@@ -170,6 +170,7 @@ class Content extends Model
         $lines->push('---');
 
         $this->clippings()->each(function ($highlight) use (&$lines) {
+            /** @var Bookmark $highlight */
             // TODO: find location or page number
             $lines->push('');
             $lines->push('> '.trim($highlight->Text));

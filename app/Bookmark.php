@@ -20,7 +20,7 @@ use MichaelAChrisco\ReadOnly\ReadOnlyTrait;
  * @property-read string $Annotation
  * @property-read string $ExtraAnnotationData
  * @property-read string $DateCreated
- * @property-read $ChapterProgress
+ * @property-read float $ChapterProgress
  * @property-read bool $Hidden
  * @property-read string $Version
  * @property-read string $DateModified
@@ -28,7 +28,7 @@ use MichaelAChrisco\ReadOnly\ReadOnlyTrait;
  * @property-read string $UUID
  * @property-read string $UserID
  * @property-read string $SyncTime
- * @property-read $Published
+ * @property-read bool $Published
  * @property-read string $ContextString
  * @property-read string $Type
  */

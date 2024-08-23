@@ -110,7 +110,7 @@ class Content extends Model
 
     protected $table = 'content';
 
-    private Package $epubData;
+    private ?Package $epubData;
 
     public function getEpubPath(): string
     {

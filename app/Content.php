@@ -184,7 +184,7 @@ class Content extends Model
             $lines->push('');
 
             $formattedDate = Carbon::parse($highlight->DateCreated, 'UTC')
-                ->local()
+                ->setTimezone(config('app.timezone'))
                 ->format('n/j/y \a\t g:ia');
 
             //if ($chapterTitle = $highlight->getChapterTitle()) {

@@ -183,7 +183,8 @@ class Content extends Model
             $lines->push('> '.trim($highlight->Text));
             $lines->push('');
 
-            $formattedDate = Carbon::parse($highlight->DateCreated)
+            $formattedDate = Carbon::parse($highlight->DateCreated, 'UTC')
+                ->local()
                 ->format('n/j/y \a\t g:ia');
 
             //if ($chapterTitle = $highlight->getChapterTitle()) {

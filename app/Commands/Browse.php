@@ -55,14 +55,33 @@ class Browse extends Command
         if ($selectedAction === 'view') {
             echo $selectedBook->getClippingsAsMarkdown();
         } else {
-            $filename = Str::slug($selectedBookTitle).'.md';
+            $filename = static::getFilename($selectedBookTitle);
             $content = $selectedBook->getClippingsAsMarkdown();
+            $path = static::getOutputPath($filename);
 
-            if (Storage::disk('local')->put($filename, $content)) {
-                $this->line('Saved '.Storage::disk('local')->path($filename).'.');
+            if (file_put_contents($path, $content) !== false) {
+                $this->line('Saved '.$path.'.');
             } else {
-                $this->error('Couldn’t save the file.');
+                $this->error("Couldn't save the file.");
             }
         }
+    }
+
+    public static function getFilename(string $title): string
+    {
+        return config('app.slugifyFilenames')
+            ? Str::slug($title).'.md'
+            : $title.'.md';
+    }
+
+    public static function getOutputPath(string $filename): string
+    {
+        $outputDir = config('app.outputDirectory');
+
+        if ($outputDir) {
+            return rtrim($outputDir, '/').'/'.$filename;
+        }
+
+        return Storage::disk('local')->path($filename);
     }
 }

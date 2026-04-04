@@ -139,46 +139,76 @@ class Content extends Model
             ->orderBy('DateCreated');
     }
 
+    /**
+     * Build the YAML frontmatter lines for this book.
+     * Only includes fields that are clean and reliable.
+     */
+    public function buildFrontmatter(?Package $epubData = null): array
+    {
+        $lines = ['---', 'title: '.$this->BookTitle];
+
+        // Author: prefer database Attribution (Kobo store data) over ePub creator
+        $author = !empty($this->Attribution) ? $this->Attribution : null;
+        if ($author === null && $epubData?->getMetadata()->has('creator')) {
+            $author = $epubData->getMetadata()->getValue('creator');
+        }
+        if ($author !== null) {
+            $lines[] = 'author: '.$author;
+        }
+
+        if ($epubData?->getMetadata()->has('date')) {
+            $lines[] = 'publicationDate: '.$epubData->getMetadata()->getValue('date');
+        }
+
+        if ($epubData?->getMetadata()->has('publisher')) {
+            $lines[] = 'publisher: '.$epubData->getMetadata()->getValue('publisher');
+        }
+
+        // ISBN: prefer database value (validated), fall back to ePub source
+        $isbn = !empty($this->ISBN) && $this->isValidIsbn($this->ISBN) ? $this->ISBN : null;
+        if ($isbn === null && $epubData?->getMetadata()->has('source')) {
+            $isbn = $epubData->getMetadata()->getValue('source');
+        }
+        if ($isbn !== null) {
+            $lines[] = 'isbn: '.$isbn;
+        }
+
+        if (!empty($this->LastTimeStartedReading)) {
+            $lines[] = 'dateStarted: '.Carbon::parse($this->LastTimeStartedReading, 'UTC')
+                ->setTimezone(config('app.timezone'))
+                ->format('Y-m-d');
+        }
+
+        if (!empty($this->LastTimeFinishedReading)) {
+            $lines[] = 'dateFinished: '.Carbon::parse($this->LastTimeFinishedReading, 'UTC')
+                ->setTimezone(config('app.timezone'))
+                ->format('Y-m-d');
+        }
+
+        $lines[] = '---';
+
+        return $lines;
+    }
+
+    protected function isValidIsbn(string $isbn): bool
+    {
+        $digits = preg_replace('/[^0-9Xx]/', '', $isbn);
+
+        return strlen($digits) === 10 || strlen($digits) === 13;
+    }
+
     public function getClippingsAsMarkdown($rawLines = false): string|\Illuminate\Support\Collection
     {
-        $lines = collect([]);
-
+        $epubData = null;
         try {
             $epubData = $this->getEpubData();
-        } catch (\Throwable $exception) {
-
+        } catch (\Throwable) {
         }
 
-        // TODO: find read time
-        // TODO: find finished time
-        $lines->push('---');
-        $lines->push('title: '.$this->BookTitle);
-
-        if (isset($epubData)) {
-            $metaData = $epubData->getMetadata();
-
-            if ($metaData->has('creator')) {
-                $lines->push('author: '.$metaData->getValue('creator'));
-            }
-
-            if ($metaData->has('date')) {
-                $lines->push('publicationDate: '.$metaData->getValue('date'));
-            }
-
-            if ($metaData->has('publisher')) {
-                $lines->push('publisher: '.$metaData->getValue('publisher'));
-            }
-
-            if ($metaData->has('source')) {
-                $lines->push('isbn: '.$metaData->getValue('source'));
-            }
-        }
-
-        $lines->push('---');
+        $lines = collect($this->buildFrontmatter($epubData));
 
         $this->clippings()->each(function ($highlight) use (&$lines) {
             /** @var Bookmark $highlight */
-            // TODO: find location or page number
             $lines->push('');
             $lines->push('> '.trim($highlight->Text));
             $lines->push('');
@@ -187,12 +217,7 @@ class Content extends Model
                 ->setTimezone(config('app.timezone'))
                 ->format('n/j/y \a\t g:ia');
 
-            //if ($chapterTitle = $highlight->getChapterTitle()) {
-            //$lines->push('– ' . $formattedDate . ', *' . $chapterTitle . '*');
-            //} else {
             $lines->push('– '.$formattedDate);
-            //}
-
             $lines->push('');
         });
 

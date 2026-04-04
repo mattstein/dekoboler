@@ -10,7 +10,10 @@ class Reader
     public function getBooks(): \Illuminate\Support\Collection
     {
         return Content::whereNotNull('BookTitle')
-            ->groupBy('BookTitle')
+            ->leftJoin('Bookmark', 'Bookmark.VolumeID', '=', 'content.BookID')
+            ->groupBy('content.BookTitle')
+            ->orderByRaw('MAX(Bookmark.DateCreated) DESC')
+            ->select('content.*')
             ->get();
     }
 

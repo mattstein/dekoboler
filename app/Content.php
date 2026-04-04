@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use ePub\Definition\Package;
 use ePub\Reader;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use MichaelAChrisco\ReadOnly\ReadOnlyTrait;
 
 /**
@@ -133,7 +135,7 @@ class Content extends Model
         return $this->epubData = $parsed;
     }
 
-    public function clippings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function clippings(): HasMany
     {
         return $this->hasMany(Bookmark::class, 'VolumeID', 'BookID')
             ->orderBy('DateCreated');
@@ -148,7 +150,7 @@ class Content extends Model
         $lines = ['---', 'title: '.$this->BookTitle];
 
         // Author: prefer database Attribution (Kobo store data) over ePub creator
-        $author = !empty($this->Attribution) ? $this->Attribution : null;
+        $author = ! empty($this->Attribution) ? $this->Attribution : null;
         if ($author === null && $epubData?->getMetadata()->has('creator')) {
             $author = $epubData->getMetadata()->getValue('creator');
         }
@@ -165,7 +167,7 @@ class Content extends Model
         }
 
         // ISBN: prefer database value (validated), fall back to ePub source
-        $isbn = !empty($this->ISBN) && $this->isValidIsbn($this->ISBN) ? $this->ISBN : null;
+        $isbn = ! empty($this->ISBN) && $this->isValidIsbn($this->ISBN) ? $this->ISBN : null;
         if ($isbn === null && $epubData?->getMetadata()->has('source')) {
             $isbn = $epubData->getMetadata()->getValue('source');
         }
@@ -173,13 +175,13 @@ class Content extends Model
             $lines[] = 'isbn: '.$isbn;
         }
 
-        if (!empty($this->LastTimeStartedReading)) {
+        if (! empty($this->LastTimeStartedReading)) {
             $lines[] = 'dateStarted: '.Carbon::parse($this->LastTimeStartedReading, 'UTC')
                 ->setTimezone(config('app.timezone'))
                 ->format('Y-m-d');
         }
 
-        if (!empty($this->LastTimeFinishedReading)) {
+        if (! empty($this->LastTimeFinishedReading)) {
             $lines[] = 'dateFinished: '.Carbon::parse($this->LastTimeFinishedReading, 'UTC')
                 ->setTimezone(config('app.timezone'))
                 ->format('Y-m-d');
@@ -197,7 +199,7 @@ class Content extends Model
         return strlen($digits) === 10 || strlen($digits) === 13;
     }
 
-    public function getClippingsAsMarkdown($rawLines = false): string|\Illuminate\Support\Collection
+    public function getClippingsAsMarkdown($rawLines = false): string|Collection
     {
         $epubData = null;
         try {

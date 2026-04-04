@@ -1,12 +1,13 @@
 <?php
 
 use App\Content;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 function makeContent(array $attributes): Content
 {
-    return tap(new Content(), fn ($c) => $c->forceFill($attributes));
+    return tap(new Content, fn ($c) => $c->forceFill($attributes));
 }
 
 test('frontmatter always includes title', function () {

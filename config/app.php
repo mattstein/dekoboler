@@ -1,5 +1,7 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+
 return [
     'name' => 'Dekoboler',
     'version' => app('git.version'),
@@ -9,6 +11,6 @@ return [
     'outputDirectory' => env('DEFAULT_OUTPUT_DIRECTORY', null),
     'ePubDir' => '/Volumes/KOBOeReader/.kobo/kepub',
     'providers' => [
-        App\Providers\AppServiceProvider::class,
+        AppServiceProvider::class,
     ],
 ];

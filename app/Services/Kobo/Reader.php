@@ -4,10 +4,11 @@ namespace App\Services\Kobo;
 
 use App\Bookmark;
 use App\Content;
+use Illuminate\Support\Collection;
 
 class Reader
 {
-    public function getBooks(): \Illuminate\Support\Collection
+    public function getBooks(): Collection
     {
         return Content::whereNotNull('BookTitle')
             ->leftJoin('Bookmark', 'Bookmark.VolumeID', '=', 'content.BookID')
@@ -17,7 +18,7 @@ class Reader
             ->get();
     }
 
-    public function getClippingsForBook($book): \Illuminate\Support\Collection
+    public function getClippingsForBook($book): Collection
     {
         return Bookmark::where('VolumeID', $book->BookID)
             ->orderBy('DateCreated')

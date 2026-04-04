@@ -1,9 +1,9 @@
 <?php
 
 use App\Commands\Browse;
-use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 test('uses book title as filename when SLUGIFY_FILENAMES is false', function () {
     config(['app.slugifyFilenames' => false]);
